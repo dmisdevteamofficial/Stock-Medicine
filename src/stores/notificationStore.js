@@ -4,15 +4,22 @@ const notifications = ref([])
 let nextId = 1
 
 export function useNotificationStore() {
-  function pushNotification({ title, message, type = 'info', duration = 4000 }) {
+  function pushNotification(opts) {
+    const {
+      title,
+      message,
+      type = 'info',
+      duration = 4000
+    } = opts || {}
     const id = nextId++
-    notifications.value.push({ id, title, message, type })
+    const n = { id, title, message, type, duration, ...opts }
+    notifications.value.push(n)
     if (duration > 0) {
       setTimeout(() => {
         removeNotification(id)
       }, duration)
     }
-    return id // คืนค่า id เพื่อใช้อ้างอิงตอนลบเอง
+    return id
   }
 
   function removeNotification(id) {

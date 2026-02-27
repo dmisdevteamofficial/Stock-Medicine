@@ -3,6 +3,7 @@ import LoginView from '../views/LoginView.vue'
 import PatientsDashboard from '../views/PatientsDashboard.vue'
 import RestockView from '../views/RestockView.vue'
 import DispensingHistory from '../views/DispensingHistory.vue'
+import SystemUsers from '../views/SystemUsers.vue'
 import { useAuthStore } from '../stores/authStore'
 import MainLayout from '../components/layout/MainLayout.vue'
 
@@ -40,6 +41,11 @@ const routes = [
         path: 'dispensing-history',
         name: 'dispensing-history',
         component: DispensingHistory
+      },
+      {
+        path: 'system-users',
+        name: 'system-users',
+        component: SystemUsers
       }
     ]
   }

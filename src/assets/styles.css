@@ -6,6 +6,30 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'SF Thonburi';
+  src: url('./fonts/SF thonburi.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Thonburi';
+  src: url('./fonts/SF thonburi.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Thonburi';
+  src: url('./fonts/SF thonburi.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
   --bg-body: radial-gradient(circle at top left, #020617 0, #020617 45%, #000 100%);
   --bg-main: #020617;
@@ -89,6 +113,15 @@ body {
   font-family: 'SF Thonburi', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg-body);
   color: var(--text-main);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
 }
 
 body {
@@ -300,7 +333,7 @@ body {
   top: 16px;
   right: 18px;
   width: 320px;
-  z-index: 100;
+  z-index: 3000;
   pointer-events: none;
 }
 
@@ -463,14 +496,14 @@ body {
 .form-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .field-label {
@@ -485,7 +518,7 @@ body {
   border: 1px solid var(--border-subtle);
   background: var(--bg-elevated);
   color: var(--text-main);
-  padding: 7px 9px;
+  padding: 8px 10px;
   font-size: clamp(12px, 1.2vw, 13px);
   outline: none;
   transition:
@@ -504,6 +537,18 @@ body {
 .field-textarea {
   min-height: 60px;
   resize: vertical;
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.section-title {
+  font-size: clamp(12px, 1.3vw, 14px);
+  font-weight: 600;
 }
 
 .button-primary {
@@ -649,4 +694,84 @@ body {
   margin-top: 10px;
   font-size: 11px;
   color: var(--text-soft);
+}
+
+/* Global side-panel styles (used by teleported panels) */
+.side-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 3500;
+}
+.side-panel {
+  background: var(--bg-elevated);
+  width: 100%;
+  max-width: 460px;
+  height: 100%;
+  border-left: 1px solid var(--border-subtle);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease-out;
+}
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.side-panel-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.side-panel-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+.side-panel-close {
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.side-panel-close:hover {
+  background: var(--bg-elevated-soft);
+  color: var(--text-main);
+}
+.side-panel-body {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+.side-panel-footer {
+  padding: 20px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 14px 0;
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
 }

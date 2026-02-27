@@ -1,0 +1,76 @@
+LIST OF TABLE IN SUPABASE(name of column and data type)
+
+1. system_users 
+    id uuid,
+    username text unique,
+    password_hash text,
+    emp_code text,
+    full_name text,
+    created_by uuid (REF with system_users.id),
+    created_at timestamp
+
+2. employees
+    id uuid,
+    employee_code text,
+    fullname text,
+    position text,
+    department text,
+    project text,
+    company text,
+    dob date,
+    tel text,
+    status text,
+    congenital_disease text,
+    drug_allergy text,
+    created_at timestamp,
+    updated_at timestamp
+
+3. medicine_list
+    id uuid,
+    name text,
+    unit text,
+    current_stock int4 default 0,
+    created_by uuid (REF with system_users.id),
+    updated_by uuid (REF with system_users.id),
+    created_at timestamp,
+    updated_at timestamp,
+    sku text
+
+4. stock_transactions
+    id uuid,
+    medicine_id uuid (REF with medicine_list.id),
+    transaction_type text,
+    quantity int4,
+    note text,
+    created_by uuid (REF with system_users.id),
+    created_at timestamp
+
+5. checkups 
+    id uuid,
+    employee_id uuid (REF with employees.id),
+    clinic_location text,
+    temp numeric,
+    bp text,
+    pulse int4,
+    rr int4,
+    spo2 int4,
+    symptoms text,
+    diagnosis text,
+    is_leave_allowed bool default false,
+    leave_start date,
+    leave_end date,
+    total_leave_date int4,
+    image_url text,
+    is_drug_allergy bool default false,
+    is_have_conditions bool default false,
+    created_by uuid (REF with system_users.id),
+    updated_by uuid (REF with system_users.id),
+    created_at timestamp,
+    updated_at timestamp,
+
+6. depensing_records
+    id uuid,
+    checkup_id uuid (REF with checkups.id),
+    medicine_id uuid (REF with medicine_list.id),
+    amount int4,
+    created_at timestamp

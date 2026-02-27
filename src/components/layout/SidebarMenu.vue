@@ -12,6 +12,7 @@
       >
         <i class="fa-solid fa-gauge" style="margin-right:6px;"></i>แดชบอร์ด
       </button>
+      
       <!-- <button
         class="sidebar-link"
         :class="{ 'sidebar-link-active': route.name === 'patients-dashboard' }"
@@ -32,6 +33,13 @@
         @click="goTo('dispensing-history')"
       >
         <i class="fa-solid fa-history" style="margin-right:6px;"></i>ประวัติการจ่ายยา
+      </button>
+      <button
+        class="sidebar-link"
+        :class="{ 'sidebar-link-active': route.name === 'system-users' }"
+        @click="goTo('system-users')"
+      >
+        <i class="fa-solid fa-users-gear" style="margin-right:6px;"></i>ผู้ใช้งานระบบ
       </button>
     </nav>
   </aside>
