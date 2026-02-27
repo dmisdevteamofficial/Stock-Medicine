@@ -1,7 +1,7 @@
 <template>
   <aside class="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-logo">TDL</div>
+      <img src="../../assets/images/cropped_circle_image.png" class="sidebar-brand-logo" alt="ThaiDrill Lao Logo" />
       <div class="sidebar-title">Medicine Stock</div>
     </div>
     <nav class="sidebar-nav">

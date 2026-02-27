@@ -2,7 +2,6 @@
   <div class="login-shell">
     <div class="login-card">
       <div class="login-header">
-        <div class="sidebar-logo">TDL</div>
         <div>
           <div class="login-title">เข้าสู่ระบบเพื่อจัดการสต๊อกยา</div>
           <div class="login-subtitle">ระบบจัดการสต๊อกยา • Supabase Auth (system_users)</div>
