@@ -26,6 +26,7 @@
             <th>ชื่อ-สกุล</th>
             <th>ตำแหน่ง</th>
             <th>แผนก</th>
+            <th>สถานะ</th>
             <th>เพิ่มโดย</th>
             <th>วันที่เพิ่ม</th>
           </tr>
@@ -37,6 +38,7 @@
             <td>{{ u.full_name }}</td>
             <td>{{ u.position || '-' }}</td>
             <td>{{ u.department || '-' }}</td>
+            <td>{{ (u.status || 'user') }}</td>
             <td>{{ u.created_by_name || '-' }}</td>
             <td>{{ formatDateTime(u.created_at) }}</td>
           </tr>
@@ -104,6 +106,13 @@
               <label class="field-label">ยืนยันรหัสผ่าน</label>
               <input class="field-input" type="password" v-model="form.confirm" />
             </div>
+            <div class="field">
+              <label class="field-label">สถานะ</label>
+              <select class="field-input" v-model="form.status">
+                <option value="user">user</option>
+                <option value="admin" :disabled="!isAdmin">admin</option>
+              </select>
+            </div>
             <div v-if="passwordError" style="font-size:12px;color:var(--accent-danger)">{{ passwordError }}</div>
           </div>
         </div>
@@ -125,6 +134,10 @@ import bcrypt from 'bcryptjs-react'
 
 const { pushNotification, removeNotification } = useNotificationStore()
 const { currentUser } = useAuthStore()
+
+const isAdmin = computed(() => {
+  return (currentUser.value?.status || '').toLowerCase() === 'admin'
+})
 
 const users = ref([])
 const loading = ref({ list: false })
@@ -223,7 +236,8 @@ const form = ref({
   department: '',
   username: '',
   password: '',
-  confirm: ''
+  confirm: '',
+  status: 'user'
 })
 
 const passwordError = computed(() => {
@@ -233,7 +247,7 @@ const passwordError = computed(() => {
   return ''
 })
 const canSave = computed(() => {
-  return !!form.value.emp_code && !!form.value.username && !!form.value.password && !passwordError.value
+  return !!form.value.emp_code && !!form.value.username && !!form.value.password && !!form.value.status && !passwordError.value
 })
 
 let countdown = ref(10)
@@ -269,6 +283,12 @@ async function confirmSave() {
   saving.value = true
   const id = pushNotification({ title: 'กำลังบันทึก...', message: 'กำลังเพิ่มผู้ใช้งานใหม่', type: 'info', duration: 0 })
   try {
+    if (!isAdmin.value && String(form.value.status).toLowerCase() === 'admin') {
+      pushNotification({ title: 'ไม่มีสิทธิ์', message: 'ผู้ใช้ทั่วไปไม่สามารถเพิ่มผู้ใช้ admin ได้', type: 'error' })
+      saving.value = false
+      removeNotification(id)
+      return
+    }
     const salt = bcrypt.genSaltSync(10)
     const hash = bcrypt.hashSync(form.value.password, salt)
     const payload = {
@@ -276,6 +296,7 @@ async function confirmSave() {
       password_hash: hash,
       emp_code: form.value.emp_code,
       full_name: form.value.full_name,
+      status: (form.value.status || 'user'),
       created_by: currentUser.value?.id || null,
       created_at: new Date().toISOString()
     }
@@ -293,7 +314,7 @@ async function confirmSave() {
 }
 
 function resetForm() {
-  form.value = { emp_code: '', full_name: '', position: '', department: '', username: '', password: '', confirm: '' }
+  form.value = { emp_code: '', full_name: '', position: '', department: '', username: '', password: '', confirm: '', status: 'user' }
   searchTerm.value = ''
   suggestions.value = []
   confirmPhase.value = false

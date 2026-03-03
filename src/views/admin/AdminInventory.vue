@@ -2,17 +2,16 @@
   <div class="page">
     <div class="page-header">
       <div>
-        <div class="page-title">Inventory Management</div>
-        <div class="page-subtitle">จัดการรายการยาและเติมสต๊อก • ข้อมูลจาก Medicine List</div>
+        <div class="page-title">Inventory Management (Admin)</div>
+        <div class="page-subtitle">เพิ่มยาและเติมสต๊อก • สำหรับผู้ดูแลระบบ</div>
       </div>
       <div class="page-actions">
-        <button class="button-primary" @click="openAddMedicineModal" :disabled="!isAdmin">
+        <button class="button-primary" @click="openAddMedicineModal">
           <i class="fa-solid fa-plus"></i> เพิ่มยาใหม่
         </button>
       </div>
     </div>
 
-    <!-- Medicine Master Table -->
     <section class="card">
       <div class="card-header">
         <div>
@@ -47,12 +46,9 @@
               </td>
               <td>{{ m.sku || '-' }}</td>
               <td style="text-align: center;">
-                <template v-if="isAdmin">
-                  <button class="icon-button" title="เติมสต๊อก" @click="openRestockModal(m)">
-                    <i class="fa-solid fa-cart-plus"></i>
-                  </button>
-                </template>
-                <template v-else>-</template>
+                <button class="icon-button" title="เติมสต๊อก" @click="openRestockModal(m)">
+                  <i class="fa-solid fa-cart-plus"></i>
+                </button>
               </td>
             </tr>
             <tr v-if="filteredMedicines.length === 0">
@@ -65,7 +61,6 @@
       </div>
     </section>
 
-    <!-- Restock History -->
     <section class="card" style="margin-top: 20px;">
       <div class="card-header">
         <div>
@@ -103,7 +98,6 @@
       </div>
     </section>
 
-    <!-- Add Medicine Side Panel -->
     <div v-if="showAddModal" class="side-panel-overlay" @click.self="closeAddModal">
       <div class="side-panel">
         <div class="side-panel-header">
@@ -140,7 +134,6 @@
       </div>
     </div>
 
-    <!-- Restock Side Panel -->
     <div v-if="showRestockModal" class="side-panel-overlay" @click.self="closeRestockModal">
       <div class="side-panel">
         <div class="side-panel-header">
@@ -185,19 +178,16 @@
 
 <script setup>
 import { computed, onMounted, ref, nextTick } from 'vue'
-import { submitRestockToSheet, addMedicine } from '../lib/googleConnect'
-import { useAuthStore } from '../stores/authStore'
-import { useNotificationStore } from '../stores/notificationStore'
-import { useDataStore } from '../stores/dataStore'
+import { submitRestockToSheet, addMedicine } from '../../lib/googleConnect'
+import { useNotificationStore } from '../../stores/notificationStore'
+import { useDataStore } from '../../stores/dataStore'
 
-// State
 const dataStore = useDataStore()
 const medicines = computed(() => dataStore.medicines)
 const history = computed(() => dataStore.restockHistory)
 const searchQuery = ref('')
 const submitting = ref(false)
 
-// Add Medicine Modal State
 const showAddModal = ref(false)
 const newMed = ref({
   name: '',
@@ -206,20 +196,12 @@ const newMed = ref({
   current_stock: 0
 })
 
-// Restock Modal State
 const showRestockModal = ref(false)
 const targetMedicine = ref(null)
 const amount = ref(0)
 const remark = ref('')
 const amountInput = ref(null)
 
-const { currentUser } = useAuthStore()
-const { pushNotification, removeNotification } = useNotificationStore()
-
-const isAdmin = computed(() => {
-  return (currentUser.value?.status || '').toLowerCase() === 'admin'
-})
-// Computed
 const filteredMedicines = computed(() => {
   if (!searchQuery.value) return medicines.value
   const query = searchQuery.value.toLowerCase()
@@ -236,7 +218,6 @@ const computedTotal = computed(() => {
   return current + a
 })
 
-// Functions - Formatting
 function normalizeDate(value) {
   if (!value) return null
   if (value instanceof Date) return value
@@ -262,15 +243,14 @@ function formatTime(value) {
   return `${h}:${m}:${s}`
 }
 
-// Functions - Data Loading
 async function loadData(force = false) {
+  const { pushNotification, removeNotification } = useNotificationStore()
   const loadingId = pushNotification({
     title: 'กำลังโหลดข้อมูล...',
     message: 'กรุณารอสักครู่ ระบบกำลังดึงข้อมูลล่าสุดจาก Medicine List',
     type: 'info',
-    duration: 0 // แสดงค้างไว้จนกว่าจะโหลดเสร็จ
+    duration: 0
   })
-  
   try {
     await Promise.all([
       dataStore.getMedicines(force),
@@ -287,9 +267,7 @@ async function loadData(force = false) {
   }
 }
 
-// Functions - Modals
 function openAddMedicineModal() {
-  if (!isAdmin.value) return
   newMed.value = { name: '', unit: '', sku: '', current_stock: 0 }
   showAddModal.value = true
 }
@@ -299,7 +277,6 @@ function closeAddModal() {
 }
 
 function openRestockModal(med) {
-  if (!isAdmin.value) return
   targetMedicine.value = med
   amount.value = 0
   remark.value = ''
@@ -314,13 +291,9 @@ function closeRestockModal() {
   targetMedicine.value = null
 }
 
-// Functions - Actions
 async function createMedicine() {
-  if (!isAdmin.value) {
-    pushNotification({ title: 'ไม่มีสิทธิ์', message: 'ผู้ใช้ทั่วไปไม่สามารถเพิ่มรายการยาได้', type: 'warning' })
-    return
-  }
   if (!newMed.value.name || !newMed.value.unit) {
+    const { pushNotification } = useNotificationStore()
     pushNotification({
       title: 'ข้อมูลไม่ครบ',
       message: 'กรุณากรอกชื่อยาและหน่วย',
@@ -328,18 +301,19 @@ async function createMedicine() {
     })
     return
   }
-
   submitting.value = true
   try {
     await addMedicine(newMed.value)
+    const { pushNotification } = useNotificationStore()
     pushNotification({
       title: 'เพิ่มยาใหม่สำเร็จ',
       message: `เพิ่ม ${newMed.value.name} เข้าสู่ระบบแล้ว`,
       type: 'success'
     })
     closeAddModal()
-    await loadData(true) // Force reload after update
+    await loadData(true)
   } catch (err) {
+    const { pushNotification } = useNotificationStore()
     pushNotification({
       title: 'บันทึกยาไม่สำเร็จ',
       message: err.message,
@@ -351,11 +325,8 @@ async function createMedicine() {
 }
 
 async function submitRestock() {
-  if (!isAdmin.value) {
-    pushNotification({ title: 'ไม่มีสิทธิ์', message: 'ผู้ใช้ทั่วไปไม่สามารถเติมสต๊อกได้', type: 'warning' })
-    return
-  }
   if (!targetMedicine.value || !amount.value || amount.value <= 0) {
+    const { pushNotification } = useNotificationStore()
     pushNotification({
       title: 'ข้อมูลไม่ครบ',
       message: 'กรุณาระบุจำนวนที่เติมมากกว่า 0',
@@ -363,25 +334,25 @@ async function submitRestock() {
     })
     return
   }
-
   submitting.value = true
   try {
-    const addBy = currentUser.value?.full_name || currentUser.value?.username || 'unknown'
+    const addBy = 'admin'
     await submitRestockToSheet({
       medicine: targetMedicine.value.name,
       amountRestock: Number(amount.value),
       remark: remark.value,
       addBy
     })
-
+    const { pushNotification } = useNotificationStore()
     pushNotification({
       title: 'บันทึกสำเร็จ',
       message: `เติม ${targetMedicine.value.name} +${amount.value} หน่วย`,
       type: 'success'
     })
     closeRestockModal()
-    await loadData(true) // Force reload after update
+    await loadData(true)
   } catch (err) {
+    const { pushNotification } = useNotificationStore()
     pushNotification({
       title: 'บันทึกไม่สำเร็จ',
       message: err.message,
@@ -393,9 +364,7 @@ async function submitRestock() {
 }
 
 onMounted(() => {
-  if (!dataStore.isMedicinesLoaded || !dataStore.isHistoryLoaded) {
-    loadData()
-  }
+  loadData()
 })
 </script>
 
@@ -404,12 +373,10 @@ onMounted(() => {
   display: flex;
   gap: 10px;
 }
-
 .table-container {
   overflow-x: auto;
   max-height: 500px;
 }
-
 .icon-button {
   background: var(--accent-soft);
   color: var(--accent);
@@ -423,14 +390,11 @@ onMounted(() => {
   cursor: pointer;
   transition: all 0.2s;
 }
-
 .icon-button:hover {
   background: var(--accent);
   color: white;
   transform: scale(1.05);
 }
-
-/* Side Panel Styles */
 .side-panel-overlay {
   position: fixed;
   top: 0;
@@ -443,7 +407,6 @@ onMounted(() => {
   justify-content: flex-end;
   z-index: 1000;
 }
-
 .side-panel {
   background: var(--bg-elevated);
   width: 100%;
@@ -455,12 +418,10 @@ onMounted(() => {
   flex-direction: column;
   animation: slideIn 0.3s ease-out;
 }
-
 @keyframes slideIn {
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
-
 .side-panel-header {
   padding: 20px;
   border-bottom: 1px solid var(--border-subtle);
@@ -468,12 +429,10 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
 }
-
 .side-panel-title {
   font-size: 16px;
   font-weight: 600;
 }
-
 .side-panel-close {
   background: transparent;
   border: none;
@@ -488,31 +447,26 @@ onMounted(() => {
   justify-content: center;
   transition: background 0.2s;
 }
-
 .side-panel-close:hover {
   background: var(--bg-elevated-soft);
   color: var(--text-main);
 }
-
 .side-panel-body {
   padding: 20px;
   flex: 1;
   overflow-y: auto;
 }
-
 .side-panel-footer {
   padding: 20px;
   border-top: 1px solid var(--border-subtle);
   display: flex;
   gap: 12px;
 }
-
 .form-vertical {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
-
 .button-ghost {
   background: transparent;
   border: 1px solid var(--border-subtle);
@@ -522,7 +476,6 @@ onMounted(() => {
   cursor: pointer;
   font-size: 13px;
 }
-
 .button-ghost:hover {
   background: var(--bg-main);
   color: var(--text-main);

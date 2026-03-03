@@ -68,7 +68,7 @@ async function submit() {
 
     const { data, error } = await supabase
       .from('system_users')
-      .select('id, username, full_name, emp_code, password_hash')
+      .select('id, username, full_name, emp_code, password_hash, status')
       .ilike('username', uname)
       .maybeSingle()
 
@@ -103,11 +103,13 @@ async function submit() {
       }
     }
 
+    const role = (data.status || '').toLowerCase() === 'admin' ? 'admin' : 'user'
     setUser({
       id: data.id,
       username: data.username,
       full_name: data.full_name,
-      emp_code: data.emp_code
+      emp_code: data.emp_code,
+      status: role
     })
     pushNotification({
       title: 'เข้าสู่ระบบสำเร็จ',
@@ -115,8 +117,11 @@ async function submit() {
       type: 'success'
     })
 
-    // หลังเข้าสู่ระบบ ส่งไปหน้า Dashboard โดยตรง
-    router.push({ name: 'dashboard' })
+    if (role === 'admin') {
+      router.push({ name: 'admin-inventory' })
+    } else {
+      router.push({ name: 'dashboard' })
+    }
   } catch (err) {
     console.error('Login submit catch', err)
     pushNotification({

@@ -7,7 +7,8 @@ LIST OF TABLE IN SUPABASE(name of column and data type)
     emp_code text,
     full_name text,
     created_by uuid (REF with system_users.id),
-    created_at timestamp
+    created_at timestamp,
+    status text
 
 2. employees
     id uuid,

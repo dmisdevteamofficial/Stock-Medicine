@@ -41,15 +41,27 @@
       >
         <i class="fa-solid fa-users-gear" style="margin-right:6px;"></i>ผู้ใช้งานระบบ
       </button>
+      <button
+        v-if="isAdmin"
+        class="sidebar-link"
+        :class="{ 'sidebar-link-active': route.name === 'admin-inventory' }"
+        @click="goTo('admin-inventory')"
+      >
+        <i class="fa-solid fa-user-shield" style="margin-right:6px;"></i>หน้าจัดการ (Admin)
+      </button>
     </nav>
   </aside>
 </template>
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useAuthStore } from '../../stores/authStore'
 
 const route = useRoute()
 const router = useRouter()
+const { currentUser } = useAuthStore()
+const isAdmin = computed(() => (currentUser.value?.status || '').toLowerCase() === 'admin')
 
 function goTo(name) {
   if (route.name !== name) {

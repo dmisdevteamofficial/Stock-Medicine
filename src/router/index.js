@@ -4,6 +4,7 @@ import PatientsDashboard from '../views/PatientsDashboard.vue'
 import RestockView from '../views/RestockView.vue'
 import DispensingHistory from '../views/DispensingHistory.vue'
 import SystemUsers from '../views/SystemUsers.vue'
+import AdminInventory from '../views/admin/AdminInventory.vue'
 import { useAuthStore } from '../stores/authStore'
 import MainLayout from '../components/layout/MainLayout.vue'
 
@@ -46,6 +47,12 @@ const routes = [
         path: 'system-users',
         name: 'system-users',
         component: SystemUsers
+      },
+      {
+        path: 'admin/inventory',
+        name: 'admin-inventory',
+        component: AdminInventory,
+        meta: { requiresAdmin: true }
       }
     ]
   }
@@ -57,7 +64,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const { isAuthenticated, restoreSession } = useAuthStore()
+  const { isAuthenticated, restoreSession, currentUser } = useAuthStore()
   restoreSession()
   const needsAuth = to.matched.some(record => record.meta.requiresAuth)
   if (needsAuth && !isAuthenticated.value) {
@@ -65,6 +72,14 @@ router.beforeEach((to, from, next) => {
   } else if (to.name === 'login' && isAuthenticated.value) {
     next({ name: 'dashboard' })
   } else {
+    const needsAdmin = to.matched.some(record => record.meta.requiresAdmin)
+    if (needsAdmin) {
+      const role = (currentUser.value?.status || '').toLowerCase()
+      if (role !== 'admin') {
+        next({ name: 'restock' })
+        return
+      }
+    }
     next()
   }
 })
